@@ -1,0 +1,44 @@
+{
+    "bezierCurveColor": {
+        "a": 255,
+        "b": 0,
+        "g": 0,
+        "r": 0
+    },
+    "canvasSize": {
+        "height": 360,
+        "width": 640
+    },
+    "enableLineBetweenPoints": true,
+    "enableBezierCurve" : true,
+    "enablePoints": true,
+    "lineBetweenPointsColor": {
+        "a": 127,
+        "b": 127,
+        "g": 127,
+        "r": 127
+    },
+    "pointColor": {
+        "a": 255,
+        "b": 0,
+        "g": 0,
+        "r": 255
+    },
+    "pointSize": 6,
+    "points": [
+        {
+            "x": 10.0,
+            "y": 10.0
+        },
+        {
+            "x": 100.0,
+            "y": 320.0
+        },
+        {
+            "x": 620.0,
+            "y": 30.0
+        }
+    ],
+    "thicknessOfBezierCurve": 10,
+    "thicknessOfLineBetweenPoints": 2
+}
