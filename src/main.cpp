@@ -2,13 +2,12 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <assert.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
-#include "Shader.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
+
+#include "Shader.h"
 #include "AppConfiguration.h"
 #include "MathExt.h"
 
@@ -23,7 +22,8 @@ int main()
     AppConfiguration appcfg = LoadConfig("config.json", CreateDefaultConfig);
     
     //1) init glfw
-    assert(glfwInit() && "failed initialize glad");
+    if (!glfwInit())
+        throw std::runtime_error("failed to initialize glfw");
     
     //2) set opengl flags
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -33,12 +33,14 @@ int main()
     
     //3) create window, set opengl context and set callbacks
     GLFWwindow *window = glfwCreateWindow((int)appcfg.canvasSize.width, (int)appcfg.canvasSize.height, "bezier", nullptr, nullptr);
-    assert(window != nullptr && "failed to create window");
+    if(window == nullptr)
+        throw std::runtime_error("failed to create window");;
     glfwMakeContextCurrent(window);
     glfwSetWindowCloseCallback(window, WindowCloseCallback);
 
     //4) load glad
-    assert(gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) && "failed to init glad");
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        throw std::runtime_error("failed to initialize glad");
 
     //5.1) Create and bind point VAO
     unsigned int pointVAO;
