@@ -23,6 +23,10 @@ add_executable(bezier ${SOURCES})
 target_compile_options(bezier PRIVATE "$<${gcc_like_cxx}:-Wall;-Wextra;-Wconversion;-std=c++17>"  
                                                         "$<${msvc_cxx}:/W3;/std:c++17>")
 
+if (WIN32)
+    target_link_options(bezier PRIVATE "/SUBSYSTEM:WINDOWS;/ENTRY:WinMainCRTStartup")
+endif()
+
 target_include_directories(bezier PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include(${CMAKE_CURRENT_SOURCE_DIR}/libs/ProjectLibs.cmake)
 
@@ -30,4 +34,26 @@ if (WIN32)
     target_link_libraries(bezier PUBLIC glm glfw nlohmann_json::nlohmann_json glad OpenGL::GL)
 else()
     target_link_libraries(bezier PUBLIC glm glfw nlohmann_json::nlohmann_json glad OpenGL::GL m pthread)
+endif()
+
+if (WIN32)
+    add_custom_command(TARGET bezier POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+    add_custom_command(TARGET bezier POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_BINARY_DIR}/_deps/glfw3-build/src/${CMAKE_BUILD_TYPE}/glfw3.dll ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+    add_custom_command(TARGET bezier POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_BINARY_DIR}/_deps/glfw3-build/src/${CMAKE_BUILD_TYPE}/glfw3.lib ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+else()
+    add_custom_command(TARGET bezier POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR})
+endif()
+
+install(TARGETS glfw bezier DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_INSTALL_BINDIR} )
+if (WIN32)
+    install(CODE "execute_process(COMMAND icacls \"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\" /grant Everyone:M)")
 endif()

@@ -16,7 +16,8 @@ CPMAddPackage(NAME glfw3
         "GLFW_BUILD_TESTS OFF"
         "GLFW_BUILD_EXAMPLES OFF"
         "GLFW_BULID_DOCS OFF"
-        "BUILD_SHARED_LIBS ON")
+        "BUILD_SHARED_LIBS ON"
+        "GLFW_INSTALL OFF")
 
 CPMAddPackage(NAME nlohmann_json
     GITHUB_REPOSITORY nlohmann/json

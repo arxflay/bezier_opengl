@@ -6,17 +6,25 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include <filesystem>
 
 #include "Shader.h"
 #include "AppConfiguration.h"
 #include "MathExt.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#define DEFINE_MAIN int APIENTRY WinMain(HINSTANCE, HINSTANCE, PSTR, int)
+#else
+#define DEFINE_MAIN int main()
+#endif
 
 void WindowCloseCallback(GLFWwindow *window);
 void FramebufferResizedCallback(GLFWwindow *, int width, int height);
 AppConfiguration CreateDefaultConfig(std::string_view filename);
 void ProcessInput(GLFWwindow *window);
 
-int main()
+DEFINE_MAIN
 {
     //0) load config
     AppConfiguration appcfg = LoadConfig("config.json", CreateDefaultConfig);
