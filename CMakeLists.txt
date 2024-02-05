@@ -57,3 +57,5 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_INSTAL
 if (WIN32)
     install(CODE "execute_process(COMMAND icacls \"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\" /grant Everyone:M)")
 endif()
+
+include(cmake/ProjectInstaller.cmake)
