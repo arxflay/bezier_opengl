@@ -45,7 +45,7 @@ if (WIN32)
         ${CMAKE_CURRENT_BINARY_DIR}/_deps/glfw3-build/src/${CMAKE_BUILD_TYPE}/glfw3.dll ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
     add_custom_command(TARGET bezier POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_CURRENT_BINARY_DIR}/_deps/glfw3-build/src/${CMAKE_BUILD_TYPE}/glfw3.lib ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+        ${CMAKE_CURRENT_BINARY_DIR}/_deps/glfw3-build/src/${CMAKE_BUILD_TYPE}/glfw3dll.lib ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
 else()
     add_custom_command(TARGET bezier POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different

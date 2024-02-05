@@ -7,7 +7,7 @@ endif()
 set(CPM_SOURCE_CACHE ${CMAKE_CURRENT_LIST_DIR}/third_party/CPM)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/FetchCPM.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CPM/CPM.cmake)
-CPMAddPackage("gh:g-truc/glm#0.9.9.8")
+CPMAddPackage("gh:g-truc/glm#0.9.9.4")
 CPMAddPackage(NAME glfw3
     GITHUB_REPOSITORY glfw/glfw
     VERSION 3.3.1
