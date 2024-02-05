@@ -1,0 +1,25 @@
+name: create-win-installer
+
+on: [workflow_dispatch]
+
+jobs:
+  create-installer:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3 
+      - uses: arxflay/bezier_opengl-build-action@v1
+        id: build-act
+        with:
+          os: windows-2022
+          build_type: Release
+          build_arch: x64
+          c_compiler: cl
+          cpp_compiler: cl
+      - name: Create installer
+        shell: bash
+        run: |
+          sh -c "cd '${{steps.build-act.outputs.build-dir}}' && cpack"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nsis-installer-files
+          path: "${{ github.workspace }}\\installers\\NSIS"

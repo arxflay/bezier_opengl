@@ -1,0 +1,50 @@
+# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
+# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
+name: cmake-multi-build
+
+on: [push, workflow_dispatch]
+
+jobs:
+  multi-build:
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: true
+
+      # Set up a matrix to run the following 3 configurations:
+      # 1. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
+      # 2. <Linux, Release, latest GCC compiler toolchain on the default runner image, default generator>
+      # 3. <Linux, Release, latest Clang compiler toolchain on the default runner image, default generator>
+      #
+      # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+        build_type: [Release, Debug]
+        build_arch: [x86, x64]
+        include:
+          - os: ubuntu-22.04
+            c_compiler: clang
+            cpp_compiler: clang++
+          - os: windows-2022
+            c_compiler: cl
+            cpp_compiler: cl
+        exclude:
+          - os: ubuntu-22.04
+            build_arch: x86
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3 
+      - uses: arxflay/cryptoutils-build-action@v1 
+        id: build-act
+        with:
+          os: ${{matrix.os}}
+          build_type: ${{ matrix.build_type }}
+          build_arch: ${{ matrix.build_arch }}
+          c_compiler: ${{ matrix.c_compiler }}
+          cpp_compiler: ${{ matrix.cpp_compiler }}
+      - name: Upload artificats
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ format('{0}_{1}_{2}', matrix.os, matrix.build_type,  matrix.build_arch) }}
+          path: ${{ steps.build-act.outputs.upload_path }}
+
