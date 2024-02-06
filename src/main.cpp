@@ -54,36 +54,12 @@ DEFINE_MAIN
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         throw std::runtime_error("failed to initialize glad");
 
-    //5.1) Create and bind point VAO
-    unsigned int pointVAO;
-    glGenVertexArrays(1, &pointVAO);
-    glBindVertexArray(pointVAO);
-    
-    //5.2) Create, bind, and configure point VBO
-    unsigned int pointVBO;
-    glGenBuffers(1, &pointVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, pointVBO);
-    float pointVerticies[] = {
-         0.5f,  0.5f,
-         0.0f,  0.5f,
-         0.33f, 1.0f,
-         0.66f, 1.0f, 
-         0.99f, 0.5f,
-         0.66f, 0.0f,
-         0.33f, 0.0f,
-         0.0f,  0.5f
-    };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(pointVerticies), pointVerticies, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)(0));
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-
-    //5.3) Create and bind rect VAO
+    //5.1) Create and bind rect VAO
     unsigned int rectVAO;
     glGenVertexArrays(1, &rectVAO);
     glBindVertexArray(rectVAO);
     
-    //5.4) Create, bind, and configure rect VBO
+    //5.2) Create, bind, and configure rect VBO
     unsigned int rectVBO;
     glGenBuffers(1, &rectVBO);
     glBindBuffer(GL_ARRAY_BUFFER, rectVBO);
@@ -96,7 +72,7 @@ DEFINE_MAIN
          0.0f,  1.0f
     };
     glBufferData(GL_ARRAY_BUFFER, sizeof(rectVerticies), rectVerticies, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)(0));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) << 1, (void*)(0));
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
@@ -107,7 +83,7 @@ DEFINE_MAIN
     //5.4) calculate curve discretePoints
     //formula https://en.wikipedia.org/wiki/B%C3%A9zier_curve
     //quadratic example = (1-t)^2p_0 + 2(1-t)tP_1 + t^2P_2
-    size_t canvasSizeAverage = std::max<size_t>((appcfg.canvasSize.height + appcfg.canvasSize.width) / 4, 10);
+    size_t canvasSizeAverage = std::max<size_t>((appcfg.canvasSize.height + appcfg.canvasSize.width) << 2, 10);
     std::vector<float> curveDiscretePoints(canvasSizeAverage * 4);
     for (size_t curveParameter = 0; curveParameter < canvasSizeAverage; curveParameter++)
     {
@@ -166,7 +142,7 @@ DEFINE_MAIN
     glBindBuffer(GL_ARRAY_BUFFER, discretePointsVBO);
 
     glBufferData(GL_ARRAY_BUFFER, (GLsizei)(curveDiscretePoints.size() * sizeof(float)), curveDiscretePoints.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)(0));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) << 1, (void*)(0));
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
@@ -226,7 +202,7 @@ DEFINE_MAIN
             
             if(appcfg.enablePoints)
             {
-                glBindVertexArray(pointVAO);
+                glBindVertexArray(rectVAO);
                 //5.8) draw points
                 for (size_t i = 0; i < appcfg.points.size(); i++)
                 {
@@ -242,7 +218,7 @@ DEFINE_MAIN
                     rectShader.SetUniformVec4("elementColor", appcfg.pointColor.ToGLColor());
                     
                     //draw point
-                    glDrawArrays(GL_TRIANGLE_FAN, 0, 8);
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
                 }
             }
             if(appcfg.enableBezierCurve)
