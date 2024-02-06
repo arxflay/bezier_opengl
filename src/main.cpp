@@ -24,6 +24,8 @@ void WindowCloseCallback(GLFWwindow *window);
 void FramebufferResizedCallback(GLFWwindow *, int width, int height);
 AppConfiguration CreateDefaultConfig(std::string_view filename);
 void ProcessInput(GLFWwindow *window);
+void FocusCallback(GLFWwindow *window, int focused);
+bool g_Render = true;
 
 DEFINE_MAIN
 {
@@ -46,6 +48,7 @@ DEFINE_MAIN
         throw std::runtime_error("failed to create window");;
     glfwMakeContextCurrent(window);
     glfwSetWindowCloseCallback(window, WindowCloseCallback);
+    glfwSetWindowFocusCallback(window, FocusCallback);
 
     //4) load glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -115,7 +118,7 @@ DEFINE_MAIN
         size_t maxExponent = appcfg.points.size() - 1;
         for (size_t pointIndex = 0; pointIndex < appcfg.points.size() - 1; pointIndex++)
         {
-            float combination = Combination(appcfg.points.size(), pointIndex);
+            float combination = Combination(maxExponent, pointIndex);
             float one_minus_t_pow = (float)std::pow(1 - t, maxExponent - pointIndex);
             float tPow = (float)std::pow(t, pointIndex);
 
@@ -149,6 +152,7 @@ DEFINE_MAIN
         glm::vec2 perpVec(-vecToThisPoint.y, vecToThisPoint.x); //use perVec as coefiecent
         curveDiscretePoints[lastPointIndexBegin + 2] = lastPoint.x + perpVec.x * (float)appcfg.thicknessOfBezierCurve;
         curveDiscretePoints[lastPointIndexBegin + 3] = lastPoint.y + perpVec.y * (float)appcfg.thicknessOfBezierCurve;
+
     }
 
     //5.5) Create and bind discretePoints VAO
@@ -177,78 +181,81 @@ DEFINE_MAIN
 
     while(!glfwWindowShouldClose(window))
     {
-        glClear(GL_COLOR_BUFFER_BIT);
         glfwPollEvents();
         ProcessInput(window);
-        rectShader.UseShader();
-        rectShader.SetUniformMat4("projectionMatrix", projectionMatrix);
-        
-        if (appcfg.enableLineBetweenPoints)
+        if (g_Render)
         {
-            glBindVertexArray(rectVAO);
-            //5.7) draw line between two points
-            for (size_t i = 1; i < appcfg.points.size(); i++)
+            g_Render = false;
+            glClear(GL_COLOR_BUFFER_BIT);
+            rectShader.UseShader();
+            rectShader.SetUniformMat4("projectionMatrix", projectionMatrix);
+            if (appcfg.enableLineBetweenPoints)
             {
-                const Point &currentPoint = appcfg.points[i - 1];
-                const Point &nextPoint = appcfg.points[i];
-                
-                //calculate rotation angle between two points
-                glm::vec2 vecToNextPoint = glm::vec2(nextPoint.x - currentPoint.x, nextPoint.y - currentPoint.y);
-                float vecLen = glm::sqrt(vecToNextPoint.x * vecToNextPoint.x + vecToNextPoint.y * vecToNextPoint.y);
-                float angleInRads = 0;
-                if (glm::sign(vecToNextPoint.y) == -1) //more than 180 degrees
-                    angleInRads = glm::pi<float>() + (glm::pi<float>() - glm::acos(vecToNextPoint.x / vecLen));
-                else
-                    angleInRads = glm::acos(vecToNextPoint.x / vecLen);
+                glBindVertexArray(rectVAO);
+                //5.7) draw line between two points
+                for (size_t i = 1; i < appcfg.points.size(); i++)
+                {
+                    const Point &currentPoint = appcfg.points[i - 1];
+                    const Point &nextPoint = appcfg.points[i];
+                    
+                    //calculate rotation angle between two points
+                    glm::vec2 vecToNextPoint = glm::vec2(nextPoint.x - currentPoint.x, nextPoint.y - currentPoint.y);
+                    float vecLen = glm::sqrt(vecToNextPoint.x * vecToNextPoint.x + vecToNextPoint.y * vecToNextPoint.y);
+                    float angleInRads = 0;
+                    if (glm::sign(vecToNextPoint.y) == -1) //more than 180 degrees
+                        angleInRads = glm::pi<float>() + (glm::pi<float>() - glm::acos(vecToNextPoint.x / vecLen));
+                    else
+                        angleInRads = glm::acos(vecToNextPoint.x / vecLen);
 
-                //set line model matrix
-                float xOffset = (float)appcfg.pointSize / 2;
-                float yOffset = ((float)appcfg.pointSize - (float)appcfg.thicknessOfLineBetweenPoints) / 2;
-                glm::mat4 lineModelMatrix = glm::mat4(1.0f);
-                lineModelMatrix = glm::translate(lineModelMatrix, glm::vec3(currentPoint.x + xOffset, currentPoint.y + yOffset, 0.0f));
-                lineModelMatrix = glm::rotate(lineModelMatrix, angleInRads, glm::vec3(0.0f, 0.0f, 1.0f));
-                lineModelMatrix = glm::scale(lineModelMatrix, glm::vec3(vecLen, appcfg.thicknessOfLineBetweenPoints, 1.0f));
-                
-                //set uniforms
-                rectShader.SetUniformMat4("modelMatrix", lineModelMatrix);
-                rectShader.SetUniformVec4("elementColor", appcfg.lineBetweenPointsColor.ToGLColor());
-                
-                //draw line
-                glDrawArrays(GL_TRIANGLES, 0, 6);
+                    //set line model matrix
+                    float xOffset = (float)appcfg.pointSize / 2;
+                    float yOffset = ((float)appcfg.pointSize - (float)appcfg.thicknessOfLineBetweenPoints) / 2;
+                    glm::mat4 lineModelMatrix = glm::mat4(1.0f);
+                    lineModelMatrix = glm::translate(lineModelMatrix, glm::vec3(currentPoint.x + xOffset, currentPoint.y + yOffset, 0.0f));
+                    lineModelMatrix = glm::rotate(lineModelMatrix, angleInRads, glm::vec3(0.0f, 0.0f, 1.0f));
+                    lineModelMatrix = glm::scale(lineModelMatrix, glm::vec3(vecLen, appcfg.thicknessOfLineBetweenPoints, 1.0f));
+                    
+                    //set uniforms
+                    rectShader.SetUniformMat4("modelMatrix", lineModelMatrix);
+                    rectShader.SetUniformVec4("elementColor", appcfg.lineBetweenPointsColor.ToGLColor());
+                    
+                    //draw line
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
             }
-        }
-        
-        if(appcfg.enablePoints)
-        {
-            glBindVertexArray(pointVAO);
-            //5.8) draw points
-            for (size_t i = 0; i < appcfg.points.size(); i++)
+            
+            if(appcfg.enablePoints)
             {
-                Point p = appcfg.points[i];
-                
-                //set point model matrix
-                glm::mat4 pointModelMatrix = glm::mat4(1.0f);
-                pointModelMatrix = glm::translate(pointModelMatrix, glm::vec3(p.x, p.y, 0.0f));
-                pointModelMatrix = glm::scale(pointModelMatrix, glm::vec3(appcfg.pointSize, appcfg.pointSize, 0.0f));
-                
-                //set uniforms
-                rectShader.SetUniformMat4("modelMatrix", pointModelMatrix);
-                rectShader.SetUniformVec4("elementColor", appcfg.pointColor.ToGLColor());
-                
-                //draw point
-                glDrawArrays(GL_TRIANGLE_FAN, 0, 8);
+                glBindVertexArray(pointVAO);
+                //5.8) draw points
+                for (size_t i = 0; i < appcfg.points.size(); i++)
+                {
+                    Point p = appcfg.points[i];
+                    
+                    //set point model matrix
+                    glm::mat4 pointModelMatrix = glm::mat4(1.0f);
+                    pointModelMatrix = glm::translate(pointModelMatrix, glm::vec3(p.x, p.y, 0.0f));
+                    pointModelMatrix = glm::scale(pointModelMatrix, glm::vec3(appcfg.pointSize, appcfg.pointSize, 0.0f));
+                    
+                    //set uniforms
+                    rectShader.SetUniformMat4("modelMatrix", pointModelMatrix);
+                    rectShader.SetUniformVec4("elementColor", appcfg.pointColor.ToGLColor());
+                    
+                    //draw point
+                    glDrawArrays(GL_TRIANGLE_FAN, 0, 8);
+                }
             }
+            if(appcfg.enableBezierCurve)
+            {
+                //5.9) draw curve
+                glBindVertexArray(discretePointsVAO);
+                curveShader.UseShader();
+                curveShader.SetUniformMat4("projectionMatrix", projectionMatrix);
+                curveShader.SetUniformVec4("elementColor", appcfg.bezierCurveColor.ToGLColor());
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, (GLsizei)(curveDiscretePoints.size() >> 1));
+            }
+            glfwSwapBuffers(window);
         }
-        if(appcfg.enableBezierCurve)
-        {
-            //5.9) draw curve
-            glBindVertexArray(discretePointsVAO);
-            curveShader.UseShader();
-            curveShader.SetUniformMat4("projectionMatrix", projectionMatrix);
-            curveShader.SetUniformVec4("elementColor", appcfg.bezierCurveColor.ToGLColor());
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, (GLsizei)(curveDiscretePoints.size() / 2));
-        }
-        glfwSwapBuffers(window);
     }
     glfwTerminate();
 
@@ -260,17 +267,30 @@ void WindowCloseCallback(GLFWwindow *window)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
+void FocusCallback(GLFWwindow *, int focused)
+{
+    if (focused == GL_TRUE)
+        g_Render = true;
+}
+
 void FramebufferResizedCallback(GLFWwindow *, int width, int height)
 {
     glViewport(0, 0, width, height);
+    g_Render = true;
 }
 
 void ProcessInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_L))
+    {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        g_Render = true;
+    }
     else if (glfwGetKey(window, GLFW_KEY_F))
+    {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        g_Render = true;
+    }
 }
 
 AppConfiguration CreateDefaultConfig(std::string_view filename)
