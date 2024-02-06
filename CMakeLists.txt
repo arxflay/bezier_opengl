@@ -46,14 +46,15 @@ if (WIN32)
     add_custom_command(TARGET bezier POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_CURRENT_BINARY_DIR}/_deps/glfw3-build/src/${CMAKE_BUILD_TYPE}/glfw3dll.lib ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+    install(TARGETS glfw DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
 else()
     add_custom_command(TARGET bezier POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
-install(TARGETS glfw bezier DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_INSTALL_BINDIR} )
+install(TARGETS bezier DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
 if (WIN32)
     install(CODE "execute_process(COMMAND icacls \"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\" /grant Everyone:M)")
 endif()

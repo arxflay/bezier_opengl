@@ -35,4 +35,5 @@ build/*
 libs/CPM/*
 libs/third_party/CPM/
 config.json
-
+.cache/*
+compile_commands.json

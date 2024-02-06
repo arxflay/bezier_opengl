@@ -12,6 +12,7 @@
 #include "AppConfiguration.h"
 #include "MathExt.h"
 
+//On windows UI apps use WinMain
 #ifdef _WIN32
 #include <windows.h>
 #define DEFINE_MAIN int APIENTRY WinMain(HINSTANCE, HINSTANCE, PSTR, int)
@@ -285,7 +286,7 @@ AppConfiguration CreateDefaultConfig(std::string_view filename)
     config.lineBetweenPointsColor = Color(127, 127, 127, 127);
     config.points.resize(2);
     config.points[0] = Point{0, 0};
-    config.points[1] = Point{(float)config.canvasSize.width - config.pointSize, (float)config.canvasSize.height - config.pointSize};
+    config.points[1] = Point{(float)config.canvasSize.width - (float)config.pointSize, (float)config.canvasSize.height - (float)config.pointSize};
     config.enablePoints = true;
     config.enableBezierCurve = true;
     config.enableLineBetweenPoints = true;
