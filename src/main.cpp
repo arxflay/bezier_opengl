@@ -83,7 +83,7 @@ DEFINE_MAIN
     //5.4) calculate curve discretePoints
     //formula https://en.wikipedia.org/wiki/B%C3%A9zier_curve
     //quadratic example = (1-t)^2p_0 + 2(1-t)tP_1 + t^2P_2
-    size_t canvasSizeAverage = std::max<size_t>((appcfg.canvasSize.height + appcfg.canvasSize.width) << 2, 10);
+    size_t canvasSizeAverage = std::max<size_t>((appcfg.canvasSize.height + appcfg.canvasSize.width) >> 2, 10);
     std::vector<float> curveDiscretePoints(canvasSizeAverage * 4);
     for (size_t curveParameter = 0; curveParameter < canvasSizeAverage; curveParameter++)
     {
